@@ -7,6 +7,7 @@ const pool = new Pool({
 });
 
 export default NextAuth({
+  debug: true,
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -17,29 +18,32 @@ export default NextAuth({
       async authorize(credentials) {
         try {
           const { email, password } = credentials;
-
-          // Query the database for the user
+      
+          console.log('Authorize called with email:', email);
+      
           const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
           const user = result.rows[0];
-
+      
+          console.log('Database query result:', user);
+      
           if (!user) {
-            console.log('No user found with this email');
-            return null; // No user found
+            console.error('No user found for email:', email);
+            throw new Error('No user found');
           }
-
-          // Plaintext password comparison (replace with bcrypt for production)
+      
           if (password !== user.password) {
-            console.log('Incorrect password');
-            return null; // Invalid password
+            console.error('Incorrect password for email:', email);
+            throw new Error('Invalid credentials');
           }
-
-          // Return the user object if authentication is successful
+      
+          console.log('User authenticated successfully:', email);
           return { id: user.id, email: user.email };
         } catch (error) {
-          console.error('Error during authentication:', error);
-          return null; // Authentication failed
+          console.error('Error during authentication:', error.message);
+          throw error;
         }
-      },
+      }
+      
     }),
   ],
   session: {
