@@ -1,3 +1,36 @@
+## Financial Planner
+
+Explain what your project does and why it's useful.
+Include any key features or benefits.
+
+## INSTALL INSTRUCTIONS
+
+-
+-
+-
+-
+-
+
+
+## USAGE
+
+-
+-
+-
+-
+
+## CONTRIBUTING.MD
+
+
+
+## CREDITS
+
+LTG-CB
+
+## LICENSE
+
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
