@@ -4,7 +4,7 @@ import { Pool } from 'pg';
 // Create a new connection pool to the database using the connection string from the environment variables
 const pool = new Pool({
     // Connection string to the PostgreSQL database
-  connectionString: process.env.POSTGRES_URL,
+  connectionString: process.env.POSTGRES_URL_NON_POOLING,
 });
 
 // Define the API route handler
