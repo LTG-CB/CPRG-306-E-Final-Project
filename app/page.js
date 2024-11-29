@@ -1,79 +1,117 @@
-// This directive is required for React components in Next.js when using server components.
 'use client';
 
-// Importing the useState hook for managing local state.
-import { useState } from 'react';
-// Importing NextAuth functions for session handling, signing in, and signing out.
-import { useSession, signIn, signOut } from 'next-auth/react';
+import { useState, useEffect } from 'react'; // Importing useState and useEffect hooks for local state and side effects
+import { useSession, signIn, signOut } from 'next-auth/react'; // Importing NextAuth functions for session handling
 
 export default function HomePage() {
-  // Destructure session data and its status from the useSession hook.
-  const { data: session, status } = useSession();
-  // Local state for handling and displaying sign-up errors.
-  const [signUpError, setSignUpError] = useState(null);
+  const { data: session, status } = useSession(); // Destructure session data and status from the useSession hook
+  const [signUpError, setSignUpError] = useState(null); // State to handle sign-up errors
+  const [transactions, setTransactions] = useState([]); // State to store transactions
+  const [fetchError, setFetchError] = useState(null); // State to handle transaction fetch errors
 
   // Function to handle user sign-up
   const signUp = async () => {
-    // Prompt user for email and password input
-    const email = prompt('Enter your email:');
-    const password = prompt('Enter your password:');
-    
+    const email = prompt('Enter your email:'); // Prompt for email
+    const password = prompt('Enter your password:'); // Prompt for password
+
     if (email && password) {
       try {
-        // Send the email and password to the sign-up API endpoint
         const response = await fetch('/api/auth/signup', {
-          // HTTP POST request
-          method: 'POST',
-          // Set content type as JSON
-          headers: { 'Content-Type': 'application/json' },
-          // Send the email and password in the request body
-          body: JSON.stringify({ email, password }),
+          method: 'POST', // HTTP POST request
+          headers: { 'Content-Type': 'application/json' }, // Set content type to JSON
+          body: JSON.stringify({ email, password }), // Send email and password in the request body
         });
 
         if (!response.ok) {
-          // If the response is not successful, handle the error
-          const errorData = await response.json();
-          // Extract error message or use a default message
-          throw new Error(errorData.error || 'Failed to sign up');
+          const errorData = await response.json(); // Parse error response
+          throw new Error(errorData.error || 'Failed to sign up'); // Throw error if sign-up fails
         }
 
-        // Alert the user upon successful account creation
-        alert('Account created successfully. Please sign in.');
+        alert('Account created successfully. Please sign in.'); // Notify the user of successful sign-up
       } catch (error) {
-        // Update the sign-up error state to display the error message
-        setSignUpError(error.message);
+        setSignUpError(error.message); // Update sign-up error state
       }
     }
   };
 
-  // Display loading state if the session status is "loading"
+  // Fetch transactions when the user is signed in
+  useEffect(() => {
+    if (session) {
+      const fetchTransactions = async () => {
+        try {
+          const response = await fetch('/api/transactions/transactions', {
+            method: 'GET', // HTTP GET request
+            headers: { 'Content-Type': 'application/json' }, // Set content type to JSON
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json(); // Parse error response
+            throw new Error(errorData.error || 'Failed to fetch transactions'); // Throw error if fetch fails
+          }
+
+          const data = await response.json(); // Parse successful response
+          setTransactions(data); // Update transactions state
+        } catch (error) {
+          setFetchError(error.message); // Update fetch error state
+        }
+      };
+
+      fetchTransactions(); // Call the function to fetch transactions
+    }
+  }, [session]); // Dependency array to re-run when the session changes
+
+  // Display loading state if session status is "loading"
   if (status === 'loading') {
     return <p>Loading...</p>;
   }
 
-  // If there is no active session, show the sign-in and sign-up options
+  // If no active session, show sign-in and sign-up options
   if (!session) {
     return (
       <div>
         <h1>Finance Tracker</h1>
         <p>You are not signed in.</p>
         <div>
-          <button onClick={() => signIn()}>Sign In</button> {/* Button to trigger the sign-in flow */}
+          <button onClick={() => signIn()}>Sign In</button> {/* Trigger sign-in flow */}
         </div>
         <div>
-          <button onClick={() => signUp()}>Sign Up</button> {/* Button to trigger the sign-up flow */}
+          <button onClick={() => signUp()}>Sign Up</button> {/* Trigger sign-up flow */}
         </div>
-        {signUpError && <p style={{ color: 'red' }}>{signUpError}</p>} {/* Display any sign-up error */}
+        {signUpError && <p style={{ color: 'red' }}>{signUpError}</p>} {/* Display sign-up error */}
       </div>
     );
   }
 
-  // If the user is signed in, display their email and the sign-out button
+  // If the user is signed in, display their email and fetched transactions
   return (
     <div>
       <h1>Finance Tracker</h1>
       <p>Welcome, {session.user.email}</p> {/* Display the user's email */}
-      <button onClick={() => signOut()}>Sign Out</button> {/* Button to trigger the sign-out flow */}
+      <button onClick={() => signOut()}>Sign Out</button> {/* Trigger sign-out flow */}
+      <h2>Recent Transactions</h2>
+      {fetchError && <p style={{ color: 'red' }}>{fetchError}</p>} {/* Display transaction fetch error */}
+      {transactions.length > 0 ? (
+        <ul>
+          {transactions.map((transaction) => (
+            <li key={transaction.id}>
+              <p>
+                <strong>Category:</strong> {transaction.category}
+              </p>
+              <p>
+                <strong>Amount:</strong> ${transaction.amount.toFixed(2)}
+              </p>
+              <p>
+                <strong>Description:</strong> {transaction.description || 'N/A'}
+              </p>
+              <p>
+                <strong>Date:</strong> {new Date(transaction.created_at).toLocaleDateString()}
+              </p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No transactions found.</p>
+      )}
     </div>
   );
 }
