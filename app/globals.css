@@ -19,3 +19,23 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+tfoot {
+  font-weight: bold;
+  border-top: 2px solid #000;
+}
+
+tr:hover {
+  background-color: #2f2f2f;
+}

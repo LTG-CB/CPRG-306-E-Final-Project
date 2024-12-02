@@ -37,13 +37,17 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
-      const { rows } = await pool.query('SELECT * FROM transactions WHERE user_id = (SELECT id FROM users WHERE email = $1)', [email]);
+      const { rows } = await pool.query(
+        'SELECT * FROM transactions WHERE user_id = (SELECT id FROM users WHERE email = $1) ORDER BY category',
+        [email]
+      );
       return res.status(200).json(rows);
     } catch (error) {
       console.error('[Transactions API] Error fetching transactions:', error);
       return res.status(500).json({ error: 'Failed to fetch transactions' });
     }
   }
+  
 
   if (req.method === 'PUT') {
     try {

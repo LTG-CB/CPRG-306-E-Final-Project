@@ -174,8 +174,8 @@ export default function HomePage() {
     return (
       <div>
         <h1>Finance Tracker</h1>
-        <button onClick={() => signIn()}>Sign In</button>
-        <button onClick={signUp}>Sign Up</button> {/* Sign-Up button */}
+        <div><button onClick={() => signIn()}>Sign In</button></div>
+        <div><button onClick={signUp}>Sign Up</button> {/* Sign-Up button */}</div>
         {error && <p style={{ color: 'red' }}>{error}</p>}
       </div>
     );
@@ -188,14 +188,41 @@ export default function HomePage() {
       <button onClick={() => signOut()}>Sign Out</button>
 
       <h2>Recent Transactions</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <ul>
-        {transactions.map((tx) => (
-          <li key={tx.id}>
-            {tx.category}: ${Number(tx.amount).toFixed(2)} ({tx.description || 'No description'})
-          </li>
-        ))}
-      </ul>
+{error && <p style={{ color: 'red' }}>{error}</p>}
+{transactions.length > 0 ? (
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Category</th>
+        <th>Amount</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      {transactions.map((tx) => (
+        <tr key={tx.id}>
+          <td>{tx.id}</td>
+          <td>{tx.category}</td>
+          <td>${Number(tx.amount).toFixed(2)}</td>
+          <td>{tx.description || 'No description'}</td>
+        </tr>
+      ))}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colSpan="2"><strong>Total</strong></td>
+        <td colSpan="2">
+          <strong>
+            ${transactions.reduce((total, tx) => total + Number(tx.amount), 0).toFixed(2)}
+          </strong>
+        </td>
+      </tr>
+    </tfoot>
+  </table>
+) : (
+  <p>No transactions found.</p>
+)}
 
       <div><button onClick={startAddTransactionFlow}>Add Transaction</button></div>
       <div><button onClick={startEditTransactionFlow}>Edit Transaction</button></div>
